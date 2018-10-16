@@ -81,7 +81,7 @@ public abstract class GraphQLControllerBase extends ControllerBase {
   }
 
 
-  private Object runQuery(@NotNull String tenantId, @NotNull String siteId, @NotNull RootContext rootContext, @NotNull ClientIdentification clientIdentification, @NotNull String queryName, @NotNull String viewName, Map<String, Object> queryArgs, ServletWebRequest request) {
+  protected ProcessingDefinition getProcessingDefinition(RootContext rootContext, ClientIdentification clientIdentification) {
     String definitionName = clientIdentification.getDefinitionName();
     // repository defined runtime definition
     ProcessingDefinitionCacheKey processingDefinitionCacheKey = new ProcessingDefinitionCacheKey(rootContext.getSite().getSiteIndicator(), settingsService, applicationContext);
@@ -94,12 +94,22 @@ public abstract class GraphQLControllerBase extends ControllerBase {
       LOG.error("No valid processing definition found for name '{}'", definitionName);
       throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
-    // check for query existence
+    return processingDefinition;
+  }
+
+  protected QueryDefinition getQueryDefinition(ProcessingDefinition processingDefinition, String queryName, String viewName) {
     QueryDefinition queryDefinition = processingDefinition.getQueryRegistry().getDefinition(queryName, viewName);
     if (queryDefinition == null) {
-      LOG.error("No query '{}#{}' found in processing definition '{}'", queryName, viewName, definitionName);
+      LOG.error("No query '{}#{}' found in processing definition '{}'", queryName, viewName, processingDefinition.getName());
       throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     }
+    return queryDefinition;
+  }
+
+
+  private Object runQuery(@NotNull String tenantId, @NotNull String siteId, @NotNull RootContext rootContext, @NotNull ClientIdentification clientIdentification, @NotNull String queryName, @NotNull String viewName, Map<String, Object> queryArgs, ServletWebRequest request) {
+    ProcessingDefinition processingDefinition = getProcessingDefinition(rootContext, clientIdentification);
+    QueryDefinition queryDefinition = getQueryDefinition(processingDefinition, queryName, viewName);
     // run pre query interceptors
     if (queryInterceptors != null) {
       for (QueryExecutionInterceptor executionInterceptor : queryInterceptors) {

@@ -7,10 +7,14 @@ import com.coremedia.caas.schema.Types;
 import com.google.common.base.Ascii;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Strings;
+import graphql.schema.GraphQLObjectType;
 import graphql.schema.GraphQLSchema;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static graphql.schema.GraphQLSchema.newSchema;
 
 public class QueryDefinition {
 
@@ -26,6 +30,8 @@ public class QueryDefinition {
   private SchemaService schema;
 
   private QuerySchemaLoader querySchemaLoader;
+
+  private GraphQLSchema introspectionSchema;
 
 
   QueryDefinition(SchemaService schema) {
@@ -95,6 +101,10 @@ public class QueryDefinition {
     return querySchemaLoader.load(target);
   }
 
+  public GraphQLSchema getIntrospectionSchema() {
+    return introspectionSchema;
+  }
+
 
   QueryDefinition resolve() throws InvalidQueryDefinition {
     // validate
@@ -108,9 +118,17 @@ public class QueryDefinition {
     // create schema loaders
     if (Types.isList(typeName)) {
       querySchemaLoader = new ListQueryLoader(queryName, typeName, schema);
+      // fetch default introspection schema
+      introspectionSchema = querySchemaLoader.load(Collections.emptyList());
     }
     else {
       querySchemaLoader = new ObjectQueryLoader(typeName, schema);
+      // create special introspection schema for base type
+      GraphQLObjectType queryType = (GraphQLObjectType) schema.getTypes().stream().filter(e -> e.getName().equals(typeName)).findFirst().orElse(null);
+      if (queryType == null) {
+        throw new InvalidQueryDefinition("No introspection type '" + typeName + "' found for query '" + queryName + "#" + viewName + "'");
+      }
+      introspectionSchema = newSchema().query(queryType).build(schema.getTypes(), schema.getDirectives());
     }
     return this;
   }
