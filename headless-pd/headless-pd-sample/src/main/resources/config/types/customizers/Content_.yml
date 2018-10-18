@@ -1,12 +1,12 @@
 name: Content_
 customFields:
   - !CustomField
-    name: __baseinterface
+    name: _baseinterface
     targetType: String
     nonNull: true
     dataFetcher: Meta
   - !CustomField
-    name: __interfaces
+    name: _interfaces
     targetType: List:String
     nonNull: true
     dataFetcher: Meta

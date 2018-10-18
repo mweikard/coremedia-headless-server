@@ -25,13 +25,13 @@ public class MetaPropertyDataFetcher extends AbstractDataFetcher {
     SchemaService schema = getContext(environment).getProcessingDefinition().getSchemaService();
     GraphQLObjectType objectType = schema.getObjectType(source);
     if (objectType != null) {
-      if ("__interfaces".equals(sourceName)) {
+      if ("_interfaces".equals(sourceName)) {
         List<GraphQLOutputType> interfaceTypes = objectType.getInterfaces();
         if (interfaceTypes != null) {
           return interfaceTypes.stream().map(GraphQLOutputType::getName).collect(Collectors.toList());
         }
       }
-      if ("__baseinterface".equals(sourceName)) {
+      if ("_baseinterface".equals(sourceName)) {
         GraphQLInterfaceType interfaceType = schema.getInterfaceType(source);
         if (interfaceType != null) {
           return interfaceType.getName();

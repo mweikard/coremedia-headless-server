@@ -12,7 +12,7 @@ query SiteQuery {
 
 fragment ContentInfo on Content_ {
   __typename
-  __baseinterface
+  _baseinterface
   _id
   _name
   _type

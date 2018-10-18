@@ -123,7 +123,7 @@ Run the headless server and try the following URLs:
     ```json
     {
     "__typename": "CMSiteImpl",
-    "__baseinterface": "CMSite",
+    "_baseinterface": "CMSite",
     "_id": "coremedia:///cap/content/5838",
     "_name": "CaaS [Site]",
     "_type": "CMSite",

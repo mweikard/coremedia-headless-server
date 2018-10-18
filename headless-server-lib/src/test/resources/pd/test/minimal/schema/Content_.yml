@@ -2,11 +2,11 @@
 name: Content_
 fields:
   - !Meta
-    name: __baseinterface
+    name: _baseinterface
     typeName: String
     nonNull: true
   - !Meta
-    name: __interfaces
+    name: _interfaces
     typeName: List:String
     nonNull: true
   - !Property
