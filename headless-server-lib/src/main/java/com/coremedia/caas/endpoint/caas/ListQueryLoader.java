@@ -1,8 +1,8 @@
-package com.coremedia.caas.query;
+package com.coremedia.caas.endpoint.caas;
 
 import com.coremedia.caas.schema.SchemaService;
 import com.coremedia.caas.schema.Types;
-import com.coremedia.caas.schema.query.RootDataFetcher;
+import com.coremedia.caas.schema.datafetcher.query.RootDataFetcher;
 
 import graphql.GraphQLException;
 import graphql.schema.GraphQLSchema;

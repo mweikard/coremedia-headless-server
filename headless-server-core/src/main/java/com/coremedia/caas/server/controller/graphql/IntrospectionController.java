@@ -1,8 +1,7 @@
-package com.coremedia.caas.server.controller.content;
+package com.coremedia.caas.server.controller.graphql;
 
-import com.coremedia.caas.config.ProcessingDefinition;
-import com.coremedia.caas.query.QueryDefinition;
-import com.coremedia.caas.server.controller.base.GraphQLControllerBase;
+import com.coremedia.caas.endpoint.graphql.GraphQLEndpoint;
+import com.coremedia.caas.pd.ProcessingDefinition;
 import com.coremedia.caas.server.controller.base.ResponseStatusException;
 import com.coremedia.caas.server.service.request.ClientIdentification;
 import com.coremedia.caas.service.repository.RootContext;
@@ -21,24 +20,22 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.ServletWebRequest;
 
-@RestController
-@RequestMapping("/caas/v1/{tenantId}/sites/{siteId}/introspection")
-public class IntrospectionController extends GraphQLControllerBase {
+@RestController("graphqlIntrospectionController")
+public class IntrospectionController extends AbstractGraphQLController {
 
   private static final Logger LOG = LoggerFactory.getLogger(IntrospectionController.class);
 
 
   public IntrospectionController() {
-    super("caas.server.content.introspection");
+    super("graphql.server.introspection");
   }
 
 
-  private Object introspect(RootContext rootContext, ClientIdentification clientIdentification, String queryName, String viewName) {
+  private Object introspect(RootContext rootContext, ClientIdentification clientIdentification, ServletWebRequest request) {
     ProcessingDefinition processingDefinition = getProcessingDefinition(rootContext, clientIdentification);
-    QueryDefinition queryDefinition = getQueryDefinition(processingDefinition, queryName, viewName);
-    // run introspection query on base type
-    GraphQL g = GraphQL.newGraphQL(queryDefinition.getIntrospectionSchema()).build();
-    ExecutionResult result = g.execute(IntrospectionQuery.INTROSPECTION_QUERY);
+    GraphQLEndpoint endpoint = getGraphQLEndpoint(processingDefinition);
+    GraphQL graphQL = GraphQL.newGraphQL(endpoint.getQuerySchema()).build();
+    ExecutionResult result = graphQL.execute(IntrospectionQuery.INTROSPECTION_QUERY);
     if (!result.getErrors().isEmpty()) {
       for (GraphQLError error : result.getErrors()) {
         LOG.error("GraphQL execution error: {}", error.toString());
@@ -48,13 +45,10 @@ public class IntrospectionController extends GraphQLControllerBase {
   }
 
 
-  @RequestMapping(path = "/{queryName}/{viewName}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
-  public Object introspect(
-          @PathVariable("tenantId") String tenantId,
-          @PathVariable("siteId") String siteId,
-          @PathVariable("queryName") String queryName,
-          @PathVariable("viewName") String viewName,
-          ServletWebRequest request) {
+  @RequestMapping(path = "/graphql/v1/{tenantId}/sites/{siteId}/introspection", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
+  public Object introspect(@PathVariable("tenantId") String tenantId,
+                           @PathVariable("siteId") String siteId,
+                           ServletWebRequest request) {
     try {
       RootContext rootContext = resolveRootContext(tenantId, siteId, request);
       // determine client
@@ -62,7 +56,7 @@ public class IntrospectionController extends GraphQLControllerBase {
       String clientId = clientIdentification.getId().toString();
       String definitionName = clientIdentification.getDefinitionName();
       // run query
-      return execute(() -> introspect(rootContext, clientIdentification, queryName, viewName), "tenant", tenantId, "site", siteId, "client", clientId, "pd", definitionName, "query", queryName, "view", viewName);
+      return execute(() -> introspect(rootContext, clientIdentification, request), "tenant", tenantId, "site", siteId, "client", clientId, "pd", definitionName);
     } catch (AccessControlViolation e) {
       return handleError(e, request);
     } catch (ResponseStatusException e) {

@@ -1,7 +1,7 @@
 package com.coremedia.caas.extension.link;
 
-import com.coremedia.caas.config.ProcessingDefinition;
-import com.coremedia.caas.query.QueryDefinition;
+import com.coremedia.caas.endpoint.caas.QueryDefinition;
+import com.coremedia.caas.pd.ProcessingDefinition;
 import com.coremedia.caas.server.CaasServiceConfig;
 import com.coremedia.caas.server.controller.interceptor.QueryExecutionInterceptorAdapter;
 import com.coremedia.caas.server.controller.media.MediaController;

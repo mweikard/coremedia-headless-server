@@ -1,3 +1,14 @@
 description: "A minimal schema"
+defaultRichtextFormat: default
 linkBuilders:
-  default: !LinkBuilder "testLinkBuilder"
+  default: "testLinkBuilder"
+caasEndpoint:
+  !CaasEndpoint
+  enabled: true
+graphQLEndpoint:
+  !GraphQLEndpoint
+  enabled: true
+  queryFieldBuilders:
+    - !ContentQueryFieldBuilder
+      fields:
+        content:  "Content_"

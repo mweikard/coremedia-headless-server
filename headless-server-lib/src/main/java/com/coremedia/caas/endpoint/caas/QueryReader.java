@@ -1,4 +1,4 @@
-package com.coremedia.caas.query;
+package com.coremedia.caas.endpoint.caas;
 
 import com.coremedia.caas.config.loader.ConfigResourceLoader;
 import com.coremedia.caas.config.loader.LoaderError;

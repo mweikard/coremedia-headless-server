@@ -25,6 +25,16 @@ public class SwaggerConfig {
             .build();
   }
 
+  @Bean
+  public Docket graphql() {
+    return new Docket(DocumentationType.SWAGGER_2)
+            .apiInfo(apiInfo())
+            .groupName("graphql")
+            .select()
+            .paths(regex("/graphql/v1/.*"))
+            .build();
+  }
+
 
   private ApiInfo apiInfo() {
     return new ApiInfoBuilder()

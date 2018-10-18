@@ -1,4 +1,4 @@
-package com.coremedia.caas.query;
+package com.coremedia.caas.endpoint.caas;
 
 import com.google.common.collect.HashBasedTable;
 import com.google.common.collect.Table;
@@ -7,11 +7,11 @@ import graphql.execution.preparsed.PreparsedDocumentProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import javax.validation.constraints.NotNull;
 
 public class QueryRegistry implements PreparsedDocumentProvider {
 
@@ -32,11 +32,11 @@ public class QueryRegistry implements PreparsedDocumentProvider {
   }
 
 
-  public boolean hasDefinition(String queryName, String viewName) {
+  public boolean hasQueryDefinition(String queryName, String viewName) {
     return queryMapping.contains(queryName, viewName);
   }
 
-  public QueryDefinition getDefinition(String queryName, String viewName) {
+  public QueryDefinition getQueryDefinition(String queryName, String viewName) {
     return queryMapping.get(queryName, viewName);
   }
 

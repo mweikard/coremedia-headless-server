@@ -1,4 +1,4 @@
-package com.coremedia.caas.query;
+package com.coremedia.caas.endpoint.caas;
 
 import com.coremedia.caas.schema.InvalidQueryDefinition;
 import com.coremedia.caas.schema.SchemaService;

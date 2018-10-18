@@ -1,7 +1,7 @@
 package com.coremedia.caas.extension.jslt;
 
-import com.coremedia.caas.config.ProcessingDefinition;
-import com.coremedia.caas.query.QueryDefinition;
+import com.coremedia.caas.endpoint.caas.QueryDefinition;
+import com.coremedia.caas.pd.ProcessingDefinition;
 import com.coremedia.caas.server.controller.base.ResponseStatusException;
 import com.coremedia.caas.server.controller.interceptor.QueryExecutionInterceptorAdapter;
 import com.coremedia.caas.server.service.request.ClientIdentification;
@@ -31,16 +31,18 @@ public class JsltPostprocessor extends QueryExecutionInterceptorAdapter {
 
   @Override
   public Object postQuery(Object resultData, String tenantId, String siteId, ClientIdentification clientIdentification, RootContext rootContext, ProcessingDefinition processingDefinition, QueryDefinition queryDefinition, Map<String, Object> queryArgs, ServletWebRequest request) {
-    // check for query transformation option
-    String transformer = queryDefinition.getOption("jslt");
-    if (transformer != null) {
-      try {
-        // run transformation template with name specified in query option
-        Expression jslt = expressionCache.computeIfAbsent(transformer, (name) -> Parser.compileResource("jslt/" + name + ".jslt"));
-        return jslt.apply(new ObjectMapper().valueToTree(resultData));
-      } catch (Exception e) {
-        LOG.error("JSON transformation failed", e);
-        throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+    if (queryDefinition != null) {
+      // check for query transformation option
+      String transformer = queryDefinition.getOption("jslt");
+      if (transformer != null) {
+        try {
+          // run transformation template with name specified in query option
+          Expression jslt = expressionCache.computeIfAbsent(transformer, (name) -> Parser.compileResource("jslt/" + name + ".jslt"));
+          return jslt.apply(new ObjectMapper().valueToTree(resultData));
+        } catch (Exception e) {
+          LOG.error("JSON transformation failed", e);
+          throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
       }
     }
     return null;

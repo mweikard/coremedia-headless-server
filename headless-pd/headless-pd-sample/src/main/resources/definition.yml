@@ -1,4 +1,20 @@
 description: "The sample schema used by the CaaS React fragments"
 defaultRichtextFormat: detail
 linkBuilders:
-  default: !LinkBuilder "simpleLinkBuilder"
+  default: "simpleLinkBuilder"
+caasEndpoint:
+  !CaasEndpoint
+  enabled: true
+graphQLEndpoint:
+  !GraphQLEndpoint
+  enabled: true
+  queryFieldBuilders:
+    - !ContentQueryFieldBuilder
+      fields:
+        content:  "Content_"
+        article:  "CMArticle"
+        bundle:   "CMResourceBundle"
+        page:     "CMNavigation"
+        site:     "CMSite"
+        teasable: "CMTeasable"
+        video:    "CMVideo"

@@ -1,6 +1,9 @@
-package com.coremedia.caas.server.controller.content;
+package com.coremedia.caas.server.controller.caas;
 
-import com.coremedia.caas.server.controller.base.GraphQLControllerBase;
+import com.coremedia.caas.server.controller.base.ResponseStatusException;
+import com.coremedia.caas.server.service.request.ClientIdentification;
+import com.coremedia.caas.service.repository.RootContext;
+import com.coremedia.caas.service.security.AccessControlViolation;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -14,10 +17,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.context.request.ServletWebRequest;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/caas/v1/{tenantId}/sites/{siteId}")
 @Api(value = "/caas/v1/{tenantId}/sites/{siteId}", tags = "Content", description = "Operations for content objects")
-public class ContentViewController extends GraphQLControllerBase {
+public class ContentViewController extends AbstractCaasController {
 
   @SuppressWarnings("WeakerAccess")
   public static final String HANDLER_NAME_SITE_QUERY = "siteQuery";
@@ -31,6 +36,35 @@ public class ContentViewController extends GraphQLControllerBase {
 
   public ContentViewController() {
     super("caas.server.content.requests");
+  }
+
+
+  private Object execute(String tenantId, String siteId, String queryName, String targetId, String viewName, ServletWebRequest request) {
+    try {
+      RootContext rootContext;
+      if (targetId == null) {
+        rootContext = resolveRootContext(tenantId, siteId, request);
+      }
+      else {
+        rootContext = resolveRootContext(tenantId, siteId, targetId, request);
+      }
+      // determine client
+      ClientIdentification clientIdentification = resolveClient(rootContext, request);
+      String clientId = clientIdentification.getId().toString();
+      String definitionName = clientIdentification.getDefinitionName();
+      // determine query arguments
+      Map<String, Object> queryArgs = getQueryArgs(request);
+      // initialize expression evaluator
+      serviceRegistry.getExpressionEvaluator().init(queryArgs);
+      // run query
+      return execute(() -> executeQuery(tenantId, siteId, rootContext, clientIdentification, queryName, viewName, queryArgs, request), "tenant", tenantId, "site", siteId, "client", clientId, "pd", definitionName, "query", queryName, "view", viewName);
+    } catch (AccessControlViolation e) {
+      return handleError(e, request);
+    } catch (ResponseStatusException e) {
+      return handleError(e, request);
+    } catch (Exception e) {
+      return handleError(e, request);
+    }
   }
 
 

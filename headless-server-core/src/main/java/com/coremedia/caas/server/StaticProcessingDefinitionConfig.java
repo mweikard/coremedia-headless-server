@@ -1,10 +1,11 @@
 package com.coremedia.caas.server;
 
-import com.coremedia.caas.config.ProcessingDefinition;
-import com.coremedia.caas.config.ProcessingDefinitionLoader;
 import com.coremedia.caas.config.loader.ClasspathConfigResourceLoader;
+import com.coremedia.caas.pd.ProcessingDefinition;
+import com.coremedia.caas.pd.ProcessingDefinitionLoader;
 import com.coremedia.caas.schema.InvalidDefinition;
 import com.coremedia.cap.content.ContentRepository;
+import com.coremedia.cap.multisite.SitesService;
 
 import com.google.common.collect.ImmutableMap;
 import org.slf4j.Logger;
@@ -29,7 +30,7 @@ public class StaticProcessingDefinitionConfig {
 
 
   @Bean("staticProcessingDefinitions")
-  public Map<String, ProcessingDefinition> loadStaticDefinitions(ContentRepository contentRepository, ApplicationContext applicationContext) throws InvalidDefinition, IOException {
+  public Map<String, ProcessingDefinition> loadStaticDefinitions(ContentRepository contentRepository, SitesService sitesService, ApplicationContext applicationContext) throws InvalidDefinition, IOException {
     ImmutableMap.Builder<String, ProcessingDefinition> builder = ImmutableMap.builder();
     // find all deployed definitions
     PathMatchingResourcePatternResolver loader = new PathMatchingResourcePatternResolver();
@@ -42,7 +43,7 @@ public class StaticProcessingDefinitionConfig {
         String definitionPath = resourcePath.substring(0, resourcePath.length() - resourceName.length());
         String definitionName = definitionPath.substring(PD_PATH.length() + 1, definitionPath.length() - 1);
         LOG.info("Registering static processing definition '{}'", definitionName);
-        ProcessingDefinition definition = new ProcessingDefinitionLoader(definitionName, new ClasspathConfigResourceLoader(definitionPath), contentRepository, applicationContext).load();
+        ProcessingDefinition definition = new ProcessingDefinitionLoader(definitionName, new ClasspathConfigResourceLoader(definitionPath), contentRepository, sitesService, applicationContext).load();
         builder.put(definitionName, definition);
       }
     }

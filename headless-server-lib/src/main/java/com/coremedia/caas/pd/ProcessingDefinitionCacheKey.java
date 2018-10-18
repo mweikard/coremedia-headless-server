@@ -1,4 +1,4 @@
-package com.coremedia.caas.config;
+package com.coremedia.caas.pd;
 
 import com.coremedia.blueprint.base.settings.SettingsService;
 import com.coremedia.caas.config.loader.JarConfigResourceLoader;
@@ -9,6 +9,7 @@ import com.coremedia.cap.common.Blob;
 import com.coremedia.cap.common.IdHelper;
 import com.coremedia.cap.content.Content;
 import com.coremedia.cap.content.ContentRepository;
+import com.coremedia.cap.multisite.SitesService;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
@@ -33,13 +34,15 @@ public class ProcessingDefinitionCacheKey extends CacheKey<Map<String, Processin
   private String siteId;
   private ContentRepository contentRepository;
   private SettingsService settingsService;
+  private SitesService sitesService;
   private ApplicationContext applicationContext;
 
 
-  public ProcessingDefinitionCacheKey(Content siteIndicator, SettingsService settingsService, ApplicationContext applicationContext) {
+  public ProcessingDefinitionCacheKey(Content siteIndicator, SettingsService settingsService, SitesService sitesService, ApplicationContext applicationContext) {
     this.siteId = siteIndicator.getId();
     this.contentRepository = siteIndicator.getRepository();
     this.settingsService = settingsService;
+    this.sitesService = sitesService;
     this.applicationContext = applicationContext;
   }
 
@@ -59,7 +62,7 @@ public class ProcessingDefinitionCacheKey extends CacheKey<Map<String, Processin
             String sourceId = IdHelper.formatBlobId(content.getId(), PROPERTY_DEFINITION_DATA);
             try (InputStream inputStream = data.getInputStream(); JarInputStream jarInputStream = new JarInputStream(inputStream)) {
               JarConfigResourceLoader resourceLoader = new JarConfigResourceLoader(sourceId, jarInputStream);
-              builder.put(name, new ProcessingDefinitionLoader(name, resourceLoader, contentRepository, applicationContext).load());
+              builder.put(name, new ProcessingDefinitionLoader(name, resourceLoader, contentRepository, sitesService, applicationContext).load());
             } catch (InvalidDefinition | IOException e) {
               LOG.error("Cannot load definition '{}' from source '{}': {}", name, sourceId, e.getMessage());
               builder.put(name, ProcessingDefinition.INVALID);

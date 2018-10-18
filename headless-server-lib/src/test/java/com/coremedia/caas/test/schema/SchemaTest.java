@@ -1,9 +1,10 @@
 package com.coremedia.caas.test.schema;
 
-import com.coremedia.caas.config.ProcessingDefinition;
-import com.coremedia.caas.config.ProcessingDefinitionLoader;
 import com.coremedia.caas.config.loader.ClasspathConfigResourceLoader;
+import com.coremedia.caas.pd.ProcessingDefinition;
+import com.coremedia.caas.pd.ProcessingDefinitionLoader;
 import com.coremedia.cap.content.ContentRepository;
+import com.coremedia.cap.multisite.SitesService;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -31,6 +32,9 @@ public class SchemaTest {
   @Mock
   ContentRepository contentRepository;
 
+  @Mock
+  SitesService sitesService;
+
 
   @Before
   public void setUp() {
@@ -43,7 +47,7 @@ public class SchemaTest {
 
     when(contentRepository.getContentTypes()).thenReturn(Collections.emptyList());
 
-    ProcessingDefinition minimal = new ProcessingDefinitionLoader("minimal", new ClasspathConfigResourceLoader("pd/test/minimal/"), contentRepository, applicationContext).load();
+    ProcessingDefinition minimal = new ProcessingDefinitionLoader("minimal", new ClasspathConfigResourceLoader("pd/test/minimal/"), contentRepository, sitesService, applicationContext).load();
 
     assertTrue(minimal.getSchemaService().hasType("Content_"));
     assertTrue(minimal.getSchemaService().hasType("Content_Impl"));

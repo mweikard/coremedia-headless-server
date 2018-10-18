@@ -68,13 +68,18 @@ public class CaasConfig extends WebMvcConfigurerAdapter {
             .allowedOrigins("*")
             .allowedMethods("GET", "OPTIONS")
             .allowedHeaders("Authorization", "Cache-Control", "Content-Type", "X-Requested-With", CLIENTID);
+    registry.addMapping("/graphql/v1/**")
+            .maxAge(3600L)
+            .allowedOrigins("*")
+            .allowedMethods("GET", "POST", "OPTIONS")
+            .allowedHeaders("Authorization", "Cache-Control", "Content-Type", "X-Requested-With", CLIENTID);
   }
 
 
   @Override
   public void addInterceptors(InterceptorRegistry registry) {
-    registry.addInterceptor(requestDateInitializer).addPathPatterns("/caas/v1/**");
-    registry.addInterceptor(responseHeaderInitializer).addPathPatterns("/caas/v1/**").excludePathPatterns("/caas/v1/*/sites/*/media/**");
+    registry.addInterceptor(requestDateInitializer).addPathPatterns("/caas/v1/**", "graphql/v1/**");
+    registry.addInterceptor(responseHeaderInitializer).addPathPatterns("/caas/v1/**", "graphql/v1/**").excludePathPatterns("/caas/v1/*/sites/*/media/**");
   }
 
 

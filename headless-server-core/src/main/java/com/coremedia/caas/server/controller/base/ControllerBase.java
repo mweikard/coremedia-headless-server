@@ -36,7 +36,7 @@ public abstract class ControllerBase {
   private String timerName;
 
   @Autowired
-  private CaasMetrics metrics;
+  protected CaasMetrics metrics;
 
   @Autowired
   protected RequestContext requestContext;
@@ -45,14 +45,14 @@ public abstract class ControllerBase {
   protected RootContextFactory rootContextFactory;
 
   @Autowired
-  protected SitesService siteService;
+  protected SitesService sitesService;
 
   @Autowired
   @Qualifier("settingsService")
-  private SettingsService settingsService;
+  protected SettingsService settingsService;
 
   @Autowired
-  private List<TargetResolver> targetResolvers;
+  protected List<TargetResolver> targetResolvers;
 
 
   public ControllerBase(String timerName) {
@@ -61,7 +61,7 @@ public abstract class ControllerBase {
 
 
   private List<Site> resolveSites(String tenantId) {
-    return siteService.getSites().stream().filter(site -> tenantId.equals(settingsService.setting(TENANT_ID, String.class, site.getSiteIndicator()))).collect(Collectors.toList());
+    return sitesService.getSites().stream().filter(site -> tenantId.equals(settingsService.setting(TENANT_ID, String.class, site.getSiteIndicator()))).collect(Collectors.toList());
   }
 
   private Site resolveSite(String tenantId, String siteId) {
@@ -72,11 +72,11 @@ public abstract class ControllerBase {
     return null;
   }
 
-  private Object resolveTarget(Site localizedSite, String targetId) {
+  private Object resolveTarget(Site site, String targetId) {
     for (TargetResolver resolver : targetResolvers) {
-      Object target = resolver.resolveTarget(localizedSite, targetId);
+      Object target = resolver.resolveTarget(site, targetId);
       if (target != null) {
-        if (validateTarget(localizedSite, target)) {
+        if (validateTarget(site, target)) {
           return target;
         }
         return null;
@@ -85,8 +85,8 @@ public abstract class ControllerBase {
     return null;
   }
 
-  private boolean validateTarget(Site localizedSite, Object target) {
-    return !(target instanceof Content) || siteService.isContentInSite(localizedSite, (Content) target);
+  private boolean validateTarget(Site site, Object target) {
+    return !(target instanceof Content) || sitesService.isContentInSite(site, (Content) target);
   }
 
 

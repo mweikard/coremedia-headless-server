@@ -1,4 +1,4 @@
-package com.coremedia.caas.query;
+package com.coremedia.caas.endpoint.caas;
 
 import graphql.schema.GraphQLSchema;
 
