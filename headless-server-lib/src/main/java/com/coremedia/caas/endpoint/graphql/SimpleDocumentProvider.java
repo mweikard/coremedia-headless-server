@@ -1,19 +1,27 @@
 package com.coremedia.caas.endpoint.graphql;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.Weigher;
 import graphql.execution.preparsed.PreparsedDocumentEntry;
 import graphql.execution.preparsed.PreparsedDocumentProvider;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
-public class SimpleDocumentProvider implements PreparsedDocumentProvider {
+class SimpleDocumentProvider implements PreparsedDocumentProvider {
 
-  private Map<String, PreparsedDocumentEntry> preparsedQueries = new ConcurrentHashMap<>();
+  private Cache<String, PreparsedDocumentEntry> cache;
+
+
+  SimpleDocumentProvider() {
+    this.cache = Caffeine.from("maximumWeight=100000")
+                         .weigher((Weigher<String, PreparsedDocumentEntry>) (key, value) -> key.length())
+                         .build();
+  }
 
 
   @Override
   public PreparsedDocumentEntry get(String queryString, Function<String, PreparsedDocumentEntry> function) {
-    return preparsedQueries.computeIfAbsent(queryString, function);
+    return cache.get(queryString, function);
   }
 }
